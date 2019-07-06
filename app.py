@@ -3,14 +3,17 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+
 import pandas as pd
-import seaborn as sns
+
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+
 import matplotlib.pyplot as plt
-import numpy as np
+
+from datetime import datetime
+
 import os
-import base64
 
 plt.rcParams["figure.figsize"] = (18, 10)
 
@@ -107,6 +110,8 @@ app.layout = html.Div([
         html.Div(id="points_value")
     ], style={"width": "48%"}),
 
+    html.Button(id="submit_button", n_clicks=0, children="Submit"),
+
     html.Div([
         html.Img(id="wine_result")
     ])
@@ -131,31 +136,34 @@ def update_price(input_value):
 
 @app.callback(
     Output("wine_result", "src"),
-    [Input("wine_country", "value"),
-     Input("wine_color", "value"),
-     Input("wine_price", "value"),
-     Input("wine_points", "value")]
+    [Input("submit_button", "n_clicks")],
+    [State("wine_country", "value")]
+    # State("wine_color", "value"),
+    # State("wine_price", "value"),
+    # State("wine_points", "value")]
 )
-def generate_words_cloud(wine_country, wine_color, wine_price, wine_points):
-    winedata = pd.read_csv('wine_final_translated.csv', index_col=0)
-    winedata = winedata.reset_index()
-    stopwords = set(STOPWORDS)
-    result = "./assets/result.png"
-    result_name = "result.png"
-    image_directory = os.getcwd() + result_name
-    stopwords = set(STOPWORDS)
-    country = wine_country
-    color = wine_color
-    price = wine_price
-    points = wine_points
-    # text = " ".join(text for text in winedata[(winedata.country==country)&(winedata.color==color)&(winedata.price==int(price))&(winedata.points==int(points))].translated_description)
-    text = " ".join(text for text in winedata[(winedata.country == country)].translated_description)
-    wordcloud = WordCloud(stopwords=stopwords).generate(text)
-    wordcloud.to_file(result)
-    image = "/assets/{}".format(result_name)
-    return image
+def generate_words_cloud(n_clicks, value):
+    if n_clicks > 0:
+        winedata = pd.read_csv('wine_final_translated.csv', index_col=0)
+        winedata = winedata.reset_index()
+        result_folder = "./assets/"
+
+        # removing old clouds
+        files_to_remove = [os.path.join(result_folder, item) for item in os.listdir(result_folder)]
+        for item in files_to_remove:
+            os.remove(item)
+
+        result_name = "result_{}.png".format(datetime.now().strftime("%Y%m%d_%H%M%S"))
+        stopwords = set(STOPWORDS)
+        country = value
+        text = " ".join(text for text in winedata[(winedata.country == country)].translated_description)
+        wordcloud = WordCloud(stopwords=stopwords, background_color='white').generate(text)
+        wordcloud.to_file("{}{}".format(result_folder, result_name))
+        image = "/assets/{}".format(result_name)
+        print("Clicks: {}".format(n_clicks))
+        print("Country: {}".format(value))
+        return image
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
-
+    app.run_server(debug=True, dev_tools_hot_reload=False)
