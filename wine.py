@@ -159,7 +159,8 @@ app.layout = html.Div(className="container-fluid",  style={"backgroundColor": "#
                         id="wine-color",
                         options=[{"label": color.capitalize(), "value": color} for color in wine_colors],
                         value='red',
-                        placeholder="Select wine color..."
+                        placeholder="Select wine color...",
+                        clearable=False
                     )
                 ])
             ]),
@@ -173,7 +174,8 @@ app.layout = html.Div(className="container-fluid",  style={"backgroundColor": "#
                         id="wine-price-range",
                         options=[{"label": price, "value": price} for price in wine_price_range],
                         value='Expensive',
-                        placeholder="Select wine price..."
+                        placeholder="Select wine price...",
+                        clearable=False
                     )
                 ])
             ]),
@@ -188,6 +190,7 @@ app.layout = html.Div(className="container-fluid",  style={"backgroundColor": "#
                         options=[{"label": rating, "value": rating} for rating in wine_rating],
                         value='Excellent',
                         placeholder="Select wine rating...",
+                        clearable=False
                     )
                 ])
             ]),
@@ -202,6 +205,7 @@ app.layout = html.Div(className="container-fluid",  style={"backgroundColor": "#
                         options=[{"label": country, "value": country} for country in wine_country],
                         value="US",
                         placeholder="Select country...",
+                        clearable=False
                     )
                 ])
             ]),
@@ -230,7 +234,8 @@ app.layout = html.Div(className="container-fluid",  style={"backgroundColor": "#
                 html.Div(className="col-12", children=[
                     html.Div(className="card", children=[
                         html.Div(className="card-body", style={"textAlign": "center"}, children=[
-                            html.Img(id="wine-result", style={"width": "100%"})
+                            # html.Img(id="wine-result", style={"width": "100%"})
+                            html.Div(id="wine-result")
                         ])
                     ])
                 ])
@@ -252,6 +257,7 @@ def update_figure(n_clicks, color, price, rating):
         'price_range': [price],
         'rating': [rating]
     }
+
     filtered_df = full_gen_df(winedata, filter_fields, group_by_fields)
     traces = []
     for i in filtered_df.country.unique():
@@ -284,18 +290,18 @@ def update_figure(n_clicks, color, price, rating):
     }
 
 @app.callback(
-    Output('wine-result', 'src'),
+    Output('wine-result', 'children'),
     [Input("submit-button", "n_clicks")],
     [State('wine-color', 'value'),
      State('wine-price-range', 'value'),
      State('wine-country', 'value')
      ])
 def update_words_cloud(n_clicks, color, price, country):
-
+    try:
         country = country
         text = get_wc_df(winedata, country, color, price)
 
-        wordcloud = WordCloud(stopwords=stopwords, background_color='white', width=800, height=500).generate(text)
+        wordcloud = WordCloud(stopwords=stopwords, background_color='white', width=800, height=600).generate(text)
         plt.figure(figsize=(12, 7))
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')
@@ -305,8 +311,11 @@ def update_words_cloud(n_clicks, color, price, country):
             buf.seek(0)
             encoded_image = base64.b64encode(buf.read())
 
-        return 'data:image/png;base64,%s' % encoded_image.decode()
+        return html.Img(src='data:image/png;base64,%s' % encoded_image.decode(), style={"width": "100%"})
 
-
+    except ValueError as error:
+        print("Not enough words in wine description!\nDetails:  {}".format(error))
+        # return "https://cdn.pixabay.com/photo/2018/01/16/10/36/mistake-3085712_1280.jpg"
+        return html.H3("Not enough words in wine description!\nDetails: {}".format(error))
 if __name__ == "__main__":
     app.run_server(debug=True, dev_tools_hot_reload=False)
