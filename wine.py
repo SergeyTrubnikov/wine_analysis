@@ -234,7 +234,6 @@ app.layout = html.Div(className="container-fluid",  style={"backgroundColor": "#
                 html.Div(className="col-12", children=[
                     html.Div(className="card", children=[
                         html.Div(className="card-body", style={"textAlign": "center"}, children=[
-                            # html.Img(id="wine-result", style={"width": "100%"})
                             html.Div(id="wine-result")
                         ])
                     ])
@@ -315,7 +314,6 @@ def update_words_cloud(n_clicks, color, price, country):
 
     except ValueError as error:
         print("Not enough words in wine description!\nDetails:  {}".format(error))
-        # return "https://cdn.pixabay.com/photo/2018/01/16/10/36/mistake-3085712_1280.jpg"
         return html.H3("Not enough words in wine description!\nDetails: {}".format(error))
 if __name__ == "__main__":
     app.run_server(debug=True, dev_tools_hot_reload=False)
