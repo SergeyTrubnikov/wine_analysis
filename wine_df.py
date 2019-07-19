@@ -38,11 +38,11 @@ def full_gen_df(df,filter_fields, groupby_fields):
 group_by_fields = ["country", "variety"]
 
 # Filter fields
-filter_fields = {
-    'color': ['red'],
-    'pricerange':['Medium'],
-    'rating': ['Excellent']
-}
+# filter_fields = {
+#     'color': ['red'],
+#     'pricerange':['Medium'],
+#     'rating': ['Excellent']
+# }
 
 # Request the data
 

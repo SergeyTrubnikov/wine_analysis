@@ -23,7 +23,7 @@ plt.rcParams["figure.figsize"] = (8, 5)
 def update_figure(n_clicks, color, price, rating):
     filter_fields = {
         'color': [color],
-        'price_range': [price],
+        'pricerange': [price],
         'rating': [rating]
     }
 
@@ -49,8 +49,8 @@ def update_figure(n_clicks, color, price, rating):
         'layout': go.Layout(
             width=860,
             height=500,
-            xaxis={'type': 'log', 'title': 'Points'},
-            yaxis={'title': 'Price', 'range': [20, 90]},
+            xaxis={'type': 'log', 'title': 'Points', "autorange": True},
+            yaxis={'title': 'Price', 'range': [20, 90], "autorange": True},
             margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
             showlegend=False,
             autosize=True,
